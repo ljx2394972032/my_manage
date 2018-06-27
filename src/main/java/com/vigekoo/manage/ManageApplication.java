@@ -1,0 +1,18 @@
+package com.vigekoo.manage;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.bind.annotation.CrossOrigin;
+
+@SpringBootApplication
+@CrossOrigin
+@EnableScheduling
+@MapperScan({"com.vigekoo.manage.mapper", "com.vigekoo.manage.admin.dao", "com.vigekoo.manage.sys.dao"})
+public class ManageApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(ManageApplication.class, args);
+	}
+}

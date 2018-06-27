@@ -1,0 +1,72 @@
+spring:
+  datasource:
+     url: jdbc:mysql://192.168.2.185:3306/manage?characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&allowMultiQueries=true
+     username: car
+     password: password
+     driverClassName: com.mysql.jdbc.Driver
+     initialize: true
+     #连接池配置
+     initialSize: 10
+     minIdle: 5
+     maxActive: 40
+     # 配置获取连接等待超时的时间
+     maxWait: 60000
+     # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+     timeBetweenEvictionRunsMillis: 60000
+     # 配置一个连接在池中最小生存的时间，单位是毫秒
+     minEvictableIdleTimeMillis: 300000
+     testWhileIdle: true
+     testOnBorrow: true
+     testOnReturn: false
+     type: com.alibaba.druid.pool.DruidDataSource
+     min-evictable-idle-time-millis: 300000
+     validation-query: SELECT 1
+     test-while-idle: true
+     test-on-borrow: true
+     test-on-return: false
+     pool-prepared-statements: true
+     max-pool-prepared-statement-per-connection-size: 20
+     filters: stat,wall,log4j
+     connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+
+  cache:
+    type: REDIS
+  redis:
+    database: 9
+    host: 192.168.2.195
+    port: 6379
+    password: 5DX@hzgs
+    timeout: 1200
+    pool:
+      max-active: 50
+      max-wait: 600
+      max-idle: 20
+      min-idle: 5
+
+es:
+  index:  ausecondcars
+  type:   car
+  hosts:  192.168.2.183,192.168.2.184
+
+baiduanalyze:
+  siteid: 10488722
+  reportApi: http://192.168.2.181:60000/demo.php
+
+aws:
+  key:  AKIAJBGINGGM3RF42X5A
+  secret: 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
+
+upload:
+  rootpath: http://aucartest.oss-cn-hangzhou.aliyuncs.com/
+  oss:
+    accesskeyid: LTAIArFLUymfCfWG
+    accesskeysecret: e8udexOSZl4VVrwX3vkbllQiGlQdVA
+    endpoint: http://oss-cn-hangzhou.aliyuncs.com
+    outendpoint: http://oss-cn-hangzhou.aliyuncs.com
+    bucket: aucartest
+#  privateoss:
+#    accesskeyid: LTAIeTTKdE2yHALd
+#    accesskeysecret: e3XPfEBOX7ffN4QQxoKgarFvtvvREu
+#    endpoint: http://oss-cn-shanghai-internal.aliyuncs.com
+#    outendpoint: http://oss-cn-shanghai.aliyuncs.com
+#    bucket: snowleopard-private-shanghai

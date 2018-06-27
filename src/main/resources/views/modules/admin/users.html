@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../plugins/jqgrid/ui.jqgrid-bootstrap.css">
+    <link rel="stylesheet" href="../../plugins/ztree/css/metroStyle/metroStyle.css">
+    <link rel="stylesheet" href="../../css/main.css">
+    <script src="../../libs/jquery.min.js"></script>
+    <script src="../../plugins/layer/layer.js"></script>
+    <script src="../../libs/bootstrap.min.js"></script>
+    <script src="../../libs/vue.min.js"></script>
+    <script src="../../plugins/jqgrid/grid.locale-cn.js"></script>
+    <script src="../../plugins/jqgrid/jquery.jqGrid.min.js"></script>
+    <script src="../../plugins/ztree/jquery.ztree.all.min.js"></script>
+    <script src="../../js/common.js"></script>
+</head>
+<body>
+<div id="rapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2" style="width: 15%;">
+                <input type="text" class="form-control" v-model="key" @keyup.enter="query"
+                       placeholder="姓名/邮箱/手机号">
+            </div>
+            <div class="form-group col-sm-2" style="width: 8%;">
+                <select class="form-control" id="isDealer" name="isDealer" @change="changeDealer">
+                    <option value="">全部</option>
+                    <option value=1>经销商</option>
+                    <option value=0>个体</option>
+                </select>
+            </div>
+            <div class="form-group col-sm-2" style="width: 8%;">
+                <select class="form-control" id="isFrozen" name="isFrozen" @change="changeFrozen">
+                    <option value="">全部</option>
+                    <option value=1>冻结</option>
+                    <option value=0>正常</option>
+                </select>
+            </div>
+            <div class="form-group col-sm-2" style="width: 15%;">
+                <select class="form-control" name="stateList" id="stateList" @change="changeState">
+                    <option value="">选择州</option>
+                    <option v-for="(item,index) in stateSuburb" :value="item.id">{{item.stateName}}</option>
+                </select>
+            </div>
+            <div class="form-group col-sm-2" style="width: 15%;">
+                <select class="form-control" name="suburbList" id="suburbList" @change="changeSuburb">
+                    <option value="">选择区</option>
+                    <option v-for="(item,index) in suburbList" :value="item.id" >{{item.name}}</option>
+                    <!--v-if="item.id"-->
+                </select>
+            </div>
+
+            <a class="btn btn-default" @click="query"><i class="fa fa-search">&nbsp;查询</i></a>
+
+            <a v-if="hasPermission('sys:users:info')" class="btn btn-primary" @click="info">&nbsp;详情</a>
+            <a v-if="hasPermission('sys:users:save')" class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            <a v-if="hasPermission('sys:users:update')" class="btn btn-warning" @click="update"><i
+                    class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            <a v-if="hasPermission('sys:users:delete')" class="btn btn-danger" @click="del"><i
+                    class="fa fa-trash-o"></i>&nbsp;删除</a>
+            <a v-if="hasPermission('sys:users:export')" class="btn btn-primary" @click="exports">&nbsp;导出</a>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal">
+            <div class="form-group">
+                <div class="col-sm-2 control-label">邮箱</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="users.email" placeholder=""/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">手机号</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="users.phone" placeholder="手机号"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">first name</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="users.firstName" placeholder=""/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">last name</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="users.lastName" placeholder=""/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">状态</div>
+                <div class="col-sm-10">
+                    <input v-if="users.frozen==false" class="form-control" value="正常" disabled/>
+                    <input v-if="users.frozen==true" class="form-control" value="冻结" disabled/>
+                </div>
+            </div>
+            <!--下面是详情显示-->
+            <!--<div v-show="showDetail" class="form-group">-->
+                <!--<div class="col-sm-2 control-label">头像</div>-->
+                <!--<div class="col-sm-10">-->
+                    <!--<img :src="users.headUrl"/>-->
+                <!--</div>-->
+            <!--</div>-->
+            <div v-show="showDetail" class="form-group">
+                <div class="col-sm-2 control-label">邮编</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="users.postCode" placeholder=""/>
+                </div>
+            </div>
+            <div v-show="showDetail" class="form-group">
+                <div class="col-sm-2 control-label">州</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="users.state" placeholder=""/>
+                </div>
+            </div>
+            <div v-show="showDetail" class="form-group">
+                <div class="col-sm-2 control-label">郊区</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="users.suburb" placeholder=""/>
+                </div>
+            </div>
+            <div v-show="showDetail" class="form-group">
+                <div class="col-sm-2 control-label">是否经销商</div>
+                <div class="col-sm-10">
+                    <input class="form-control" v-if="users.isDealer==0" value="个体" disabled>
+                    <input class="form-control" v-if="users.isDealer==1" value="商户" disabled>
+                </div>
+            </div>
+            <!--如果是商户-->
+            <div v-if="users.isDealer==1" class="form-group">
+                <div v-show="showDetail" class="form-group">
+                    <div class="col-sm-2 control-label">经销商名</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" v-model="users.dealerName" placeholder=""/>
+                    </div>
+                </div>
+                <div v-show="showDetail" class="form-group">
+                    <div class="col-sm-2 control-label">经销商手机号</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" v-model="users.dealerPhone" placeholder=""/>
+                    </div>
+                </div>
+                <div v-show="showDetail" class="form-group">
+                    <div class="col-sm-2 control-label">经销商州</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" v-model="users.dealerState" placeholder=""/>
+                    </div>
+                </div>
+                <div v-show="showDetail" class="form-group">
+                    <div class="col-sm-2 control-label">经销商地区</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" v-model="users.dealerSuburb" placeholder=""/>
+                    </div>
+                </div>
+                <div v-show="showDetail" class="form-group">
+                    <div class="col-sm-2 control-label">经销商详细地址</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" v-model="users.dealerAddress" placeholder=""/>
+                    </div>
+                </div>
+                <div v-show="showDetail" class="form-group">
+                    <div class="col-sm-2 control-label">经销商邮编</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" v-model="users.dealerPostCode" placeholder=""/>
+                    </div>
+                </div>
+                <div v-show="showDetail" class="form-group">
+                    <div class="col-sm-2 control-label">经销商许可证</div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" v-model="users.dealerLicenseNum" placeholder=""/>
+                    </div>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <!--冻结按钮-->
+                <input v-show="showFrozen" v-if="users.frozen==false" type="button" class="btn btn-danger"
+                       @click="frozen(1)" value="冻结"/>
+                <input v-show="showFrozen" v-if="users.frozen==true" type="button" class="btn btn-success"
+                       @click="frozen(0)" value="解冻"/>
+                <span v-show="showFrozen">&nbsp;&nbsp;</span>
+
+                <!--把车商降为普通用户-->
+                <input v-show="showFrozen" v-if="users.isDealer==1" type="button" class="btn btn-warning" style="background-color: #843534"
+                       @click="downGrade" value="设为个体账户"/>
+                <input v-show="showFrozen" v-if="users.isDealer==0" type="button" class="btn btn-default" style="background-color: grey"
+                       value="已是个体用户" disabled/>
+                <span v-show="showFrozen">&nbsp;&nbsp;</span>
+
+                <input v-show="!showDetail" type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                <span v-show="!showDetail">&nbsp;&nbsp;</span>
+                <input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script src="../../js/modules/admin/users.js"></script>
+</body>
+</html>

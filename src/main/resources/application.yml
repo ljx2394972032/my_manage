@@ -1,0 +1,51 @@
+spring:
+  profiles:
+    active: dev
+   # 指定静态资源的路径
+  resources:
+    static-locations: classpath:/static/,classpath:/views/
+  redis:
+    open: true
+  thymeleaf:
+    prefix:
+      classpath: /views/
+    mode: LEGACYHTML5
+    cache: false
+
+#设置上传大小
+  http:
+    multipart:
+      maxFileSize: 6Mb
+      maxRequestSize: 6Mb
+
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    max-application-dev.ymlthreads: 1000
+    min-spare-threads: 30
+  port: 2222
+#  context-path: /vgk/car
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml,classpath:mapper/sys/*.xml,classpath:mapper/admin/*.xml
+  type-aliases-package: com.vigekoo.manage.entity,com.vigekoo.manage.sysntity
+  configuration:
+    cache-enabled: true
+debug: false
+
+#logging.level.com.vigekoo.manage.admin.dao: debug
+#logging.level.com.vigekoo.manage.mapper: debug
+
+sys:
+  kaptcha-open: true #是否开启登录时验证码 (true/false)
+  kaptcha-length: 4 #验证码的长度
+  # api接口模块，是通过jwt认证的，如果要使用api模块，则需要修改【加密秘钥】
+#  jwt:
+#    header: token
+#    # 加密秘钥
+#    secret: f4e2e52034348f86b67cde581c0f9eb5[vgk]
+#    # token有效时长，单位秒
+#    expire: 86400
+
+
+
